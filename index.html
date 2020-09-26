@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>New York Times Search</title>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+        integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <style>
+        .container {
+            width: 970px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="jumbotron" style="background-color: darkblue ; color: white;">
+            <h1 class="text-center"><strong> New York Times Search</strong></h1>
+        </div>
+        <div clas="row">
+            <div class="col-sm-12">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title"><strong>Search Parameters</strong></h3>
+                    </div>
+                    <div class="panel-body">
+                        <form>
+                            <div class="form-group">
+                                <label for="search-term">Search Term:</label>
+                                <input type="text" class="form-control" id="search-term">
+
+                            </div>
+                            <div class="form-group">
+                                <label for="num-records">Number of Records to Retrieve:</label>
+                                <select class="form-control" id="num-records">
+                                    <option>1</option>
+                                    <option>5</option>
+                                    <option>10</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="start-year">Start Year (Optional):</label>
+                                <input type="text" class="form-control" id="start-year">
+                            </div>
+                            <div class="form-group">
+                                <label for="end-year">End Year (Optional):</label>
+                                <input type="text" class="form-control" id="end-year">
+                            </div>
+                            <button type="submit" class="btn btn-primary" id="search">Search</button>
+                            <button type="submit" class="btn btn-primary" id="clear">Clear Results</button>
+                        </form>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+
+        <div clas="row">
+            <div class="col-sm-12">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title"><strong>Top Articles</strong></h3>
+                    </div>
+                </div>
+                <div class="panel-body" id="returned-articles">
+             
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+
+    <script type="text/javascript">
+        $("#clear").on("click", function () {
+            event.preventDefault();
+            $("#returned-articles").empty();
+            $("#search-term").val("");
+            $("#num-records").val("");
+            $("#start-year").val("");
+            $("#end-year").val("");
+        });
+        $("#search").on("click", function () {
+            event.preventDefault();
+            $("#returned-articles").empty();
+            var topic = $("#search-term").val();
+            if (!topic) {
+                return;
+            }
+            console.log("topic", topic);
+            var beginDate = $("#start-year").val();
+            console.log(beginDate);
+            if (beginDate) {
+                beginDate = "&begin_date=" + beginDate + "0101";
+            }
+            else {
+                beginDate = "";
+            }
+            console.log("beginDate", beginDate);
+            var endDate = $("#end-year").val();
+            if (endDate) {
+                endDate = "&end_date=" + endDate + "1231";
+            }
+            else {
+                endDate = "";
+            }
+            console.log("endDate", endDate);
+            var numResults = $("#num-records").val();
+            if (!numResults) {
+                numResults = 10;
+            }
+            else {
+                if (numResults > 10) {
+                    numResults = 10;
+                }
+            }
+            console.log("numResults", numResults);
+            var key = "LwPMjJhlBIQA0dFZ9C5nqrMxDKOEgJ6F";
+            var queryURL = "https://api.nytimes.com/svc/search/v2/articlesearch.json?q=" +
+                topic + 
+                beginDate +
+                endDate +
+                "&api-key=" + key;
+            console.log(queryURL);
+      
+            $.ajax({
+                url: queryURL,
+                method: "GET"
+            })
+                .then(function (response) {
+                    console.log(response.response.docs);
+                    for (var i = 0; i < numResults; i++) {
+                        var doc = response.response.docs[i];
+                        var headline = $("<h4>");
+                        headline.text(doc.headline.main);
+                        $("#returned-articles").append(headline)
+                        var p = $("<p>");
+                        p.text(doc.abstract);
+                        $("#returned-articles").append(p)
+                    }
+                     
+                });
+        });
+    </script>
+
+</body>
